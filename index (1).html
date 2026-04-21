@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Weekly Order Form — Royal Art Studios</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+
+  .page-header { background: #1a1a1a; color: #fff; padding: 1.5rem 1.25rem; text-align: center; }
+  .page-header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; }
+  .page-header p { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+  .card { background: #fff; border-radius: 12px; border: 0.5px solid #e0e0dc; padding: 1.25rem; margin-bottom: 1rem; }
+  .card-title { font-size: 13px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { font-size: 13px; color: #555; }
+  .field input, .field select { font-size: 15px; padding: 10px 12px; border: 0.5px solid #ddd; border-radius: 8px; background: #fafaf8; color: #1a1a1a; width: 100%; -webkit-appearance: none; }
+  .field input:focus, .field select:focus { outline: none; border-color: #888; background: #fff; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .product-row { border-bottom: 0.5px solid #f0f0ec; padding: 1rem 0; }
+  .product-row:first-child { padding-top: 0; }
+  .product-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .product-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .product-name { font-size: 14px; font-weight: 500; color: #1a1a1a; line-height: 1.4; }
+  .product-sub { font-size: 12px; color: #888; margin-top: 2px; }
+  .product-price-tag { font-size: 13px; font-weight: 500; color: #1a1a1a; white-space: nowrap; margin-left: 12px; }
+
+  .product-inputs { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: end; }
+  .product-inputs label { font-size: 12px; color: #888; }
+  .product-inputs input { font-size: 15px; padding: 8px 10px; border: 0.5px solid #ddd; border-radius: 8px; background: #fafaf8; color: #1a1a1a; width: 100%; text-align: center; }
+  .product-inputs input:focus { outline: none; border-color: #888; background: #fff; }
+  .product-inputs select { font-size: 14px; padding: 8px 10px; border: 0.5px solid #ddd; border-radius: 8px; background: #fafaf8; color: #1a1a1a; width: 100%; -webkit-appearance: none; }
+  .product-inputs select:focus { outline: none; border-color: #888; }
+
+  .line-total { font-size: 13px; color: #555; text-align: right; margin-top: 6px; min-height: 18px; }
+
+  .summary-card { background: #1a1a1a; border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
+  .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #bbb; padding: 3px 0; }
+  .summary-divider { height: 0.5px; background: #333; margin: 10px 0; }
+  .summary-total { display: flex; justify-content: space-between; font-size: 18px; font-weight: 500; color: #fff; }
+  .summary-empty { font-size: 13px; color: #666; text-align: center; padding: 8px 0; }
+
+  .notes-field { width: 100%; min-height: 80px; font-size: 14px; padding: 10px 12px; border: 0.5px solid #ddd; border-radius: 8px; background: #fafaf8; color: #1a1a1a; resize: vertical; font-family: inherit; }
+  .notes-field:focus { outline: none; border-color: #888; background: #fff; }
+
+  .submit-btn { width: 100%; margin-top: 1rem; padding: 16px; font-size: 16px; font-weight: 500; background: #1a1a1a; border: none; border-radius: 12px; color: #fff; cursor: pointer; letter-spacing: -0.01em; }
+  .submit-btn:hover { background: #333; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  .success-screen { display: none; text-align: center; padding: 3rem 1rem; }
+  .success-icon { width: 56px; height: 56px; border-radius: 50%; background: #1a1a1a; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+  .success-icon svg { width: 24px; height: 24px; }
+  .success-screen h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: #666; line-height: 1.6; max-width: 340px; margin: 0 auto; }
+  .new-order-btn { display: inline-block; margin-top: 1.5rem; padding: 12px 24px; font-size: 14px; font-weight: 500; background: #fff; border: 0.5px solid #ddd; border-radius: 8px; color: #1a1a1a; cursor: pointer; }
+
+  .error-msg { display: none; background: #fef2f2; border: 0.5px solid #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #b91c1c; margin-top: 10px; text-align: center; }
+
+  @media (max-width: 480px) {
+    .field-row { grid-template-columns: 1fr; }
+    .product-inputs { grid-template-columns: 90px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Royal Art Studios</h1>
+  <p>Weekly packaging order form</p>
+</div>
+
+<div class="container">
+
+  <div id="formSection">
+
+    <!-- Order Info -->
+    <div class="card">
+      <div class="card-title">Order info</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="clientName" placeholder="e.g. Parth Rathod" />
+        </div>
+        <div class="field">
+          <label>Week of</label>
+          <input type="date" id="weekDate" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Business / Brand name</label>
+        <input type="text" id="businessName" placeholder="e.g. Fit Curry" />
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="card">
+      <div class="card-title">Products</div>
+      <div id="productList"></div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-card" id="summaryCard">
+      <div id="summaryRows"><div class="summary-empty">No items added yet</div></div>
+      <div class="summary-divider" id="summaryDivider" style="display:none"></div>
+      <div class="summary-total" id="summaryTotal" style="display:none">
+        <span>Total</span>
+        <span id="totalAmount">$0.00 CAD</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title">Notes</div>
+      <p style="font-size:13px; color:#888; margin-bottom:10px; line-height:1.5;">Please mention which branding you need for any branded items (e.g. Fit Curry, Cheesy District, or your custom brand name). Also include any delivery instructions or special requests.</p>
+      <textarea class="notes-field" id="notes" placeholder="e.g. Brown bags — Fit Curry branding. Pizza boxes — Cheesy District. Deliver Tuesday morning."></textarea>
+    </div>
+
+    <div class="error-msg" id="errorMsg">Please fill in your name and add at least one product.</div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Submit order</button>
+
+  </div>
+
+  <!-- Success Screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2>Order submitted</h2>
+    <p id="successDetail">Your order has been sent to Royal Art Studios. You will receive a confirmation shortly.</p>
+    <button class="new-order-btn" onclick="resetForm()">Submit another order</button>
+  </div>
+
+</div>
+
+<script>
+const POWER_AUTOMATE_URL = "YOUR_POWER_AUTOMATE_URL_HERE";
+
+const PRODUCTS = [
+  { id: "c16",   name: "16oz Container",                         pack: 200,  price: 24,   branded: false },
+  { id: "l16",   name: "16oz Lid",                               pack: 200,  price: 16,   branded: false },
+  { id: "c33",   name: "33oz Container",                         pack: 200,  price: 27.5, branded: false },
+  { id: "l33",   name: "33oz Lid",                               pack: 200,  price: 17,   branded: false },
+  { id: "p15",   name: "15 Inch Pizza Box",                      pack: 50,   price: 37,   branded: false },
+  { id: "p10",   name: "10 Inch Pizza Box",                      pack: 50,   price: 21.5, branded: false },
+  { id: "bb10b", name: "Brown Paper Bag 10x5x13 — Branded",      pack: 250,  price: 60,   branded: true  },
+  { id: "bb10u", name: "Brown Paper Bag 10x5x13 — Unbranded",    pack: 250,  price: 57,   branded: false },
+  { id: "bb13b", name: "Brown Paper Bag 13x7x13 — Branded",      pack: 250,  price: 60,   branded: true  },
+  { id: "bb13u", name: "Brown Paper Bag 13x7x13 — Unbranded",    pack: 250,  price: 47,   branded: false },
+  { id: "wb10b", name: "White Paper Bag 10x5x13 — Branded",      pack: 250,  price: 65,   branded: true  },
+  { id: "wb10u", name: "White Paper Bag 10x5x13 — Unbranded",    pack: 250,  price: 60,   branded: false },
+  { id: "wb13b", name: "White Paper Bag 13x7x13 — Branded",      pack: 250,  price: 75,   branded: true  },
+  { id: "wb13u", name: "White Paper Bag 13x7x13 — Unbranded",    pack: 250,  price: 65,   branded: false },
+  { id: "pc4",   name: "4oz Portion Cups",                       pack: 2500, price: 51,   branded: false },
+  { id: "pl4",   name: "4oz Portion Cup Lids",                   pack: 2500, price: 33,   branded: false },
+  { id: "cut",   name: "Cutlery Kit (spoon, fork, knife, napkin)", pack: 500, price: 40,  branded: false },
+];
+
+const BRANDS = ["Fit Curry", "Cheesy District", "Other"];
+
+function buildProducts() {
+  const list = document.getElementById("productList");
+  PRODUCTS.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "product-row";
+    row.innerHTML = `
+      <div class="product-meta">
+        <div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-sub">Pack of ${p.pack.toLocaleString()}</div>
+        </div>
+        <div class="product-price-tag">$${p.price.toFixed(2)}/case</div>
+      </div>
+      <div class="product-inputs">
+        <div>
+          <label>Cases</label>
+          <input type="number" id="qty_${p.id}" min="0" value="" placeholder="0" oninput="updateSummary()" />
+        </div>
+        <div>
+          <label>Brand${p.branded ? " (required)" : ""}</label>
+          <select id="brand_${p.id}" onchange="handleBrandChange('${p.id}')">
+            ${BRANDS.map(b => `<option>${b}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div id="brandCustomWrap_${p.id}" style="display:none; margin-top:8px;">
+        <input type="text" id="brandCustom_${p.id}" placeholder="Enter brand name" style="font-size:14px; padding:8px 10px; border:0.5px solid #ddd; border-radius:8px; background:#fafaf8; width:100%;" />
+      </div>
+      <div class="line-total" id="lineTotal_${p.id}"></div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function handleBrandChange(id) {
+  const sel = document.getElementById("brand_" + id);
+  const wrap = document.getElementById("brandCustomWrap_" + id);
+  wrap.style.display = sel.value === "Other" ? "block" : "none";
+}
+
+function updateSummary() {
+  let total = 0;
+  const items = [];
+
+  PRODUCTS.forEach(p => {
+    const qtyRaw = document.getElementById("qty_" + p.id).value;
+    const qty = parseInt(qtyRaw) || 0;
+    const lineEl = document.getElementById("lineTotal_" + p.id);
+
+    if (qty > 0) {
+      const sub = qty * p.price;
+      total += sub;
+      lineEl.textContent = `${qty} case${qty > 1 ? "s" : ""} × $${p.price.toFixed(2)} = $${sub.toFixed(2)} CAD`;
+      items.push({ name: p.name, qty, sub });
+    } else {
+      lineEl.textContent = "";
+    }
+  });
+
+  const rowsEl = document.getElementById("summaryRows");
+  const divEl = document.getElementById("summaryDivider");
+  const totEl = document.getElementById("summaryTotal");
+
+  if (items.length === 0) {
+    rowsEl.innerHTML = '<div class="summary-empty">No items added yet</div>';
+    divEl.style.display = "none";
+    totEl.style.display = "none";
+  } else {
+    rowsEl.innerHTML = items.map(i =>
+      `<div class="summary-row"><span>${i.name} ×${i.qty}</span><span>$${i.sub.toFixed(2)}</span></div>`
+    ).join("");
+    divEl.style.display = "block";
+    totEl.style.display = "flex";
+    document.getElementById("totalAmount").textContent = "$" + total.toFixed(2) + " CAD";
+  }
+}
+
+function buildOrderText() {
+  const name = document.getElementById("clientName").value.trim();
+  const date = document.getElementById("weekDate").value;
+  const biz = document.getElementById("businessName").value.trim();
+  const notes = document.getElementById("notes").value.trim();
+  let lines = [];
+  let total = 0;
+
+  PRODUCTS.forEach(p => {
+    const qty = parseInt(document.getElementById("qty_" + p.id).value) || 0;
+    if (qty > 0) {
+      const brandSel = document.getElementById("brand_" + p.id).value;
+      const brand = brandSel === "Other"
+        ? (document.getElementById("brandCustom_" + p.id).value.trim() || "Not specified")
+        : brandSel;
+      const sub = qty * p.price;
+      total += sub;
+      lines.push({ product: p.name, cases: qty, brand, subtotal: "$" + sub.toFixed(2) + " CAD" });
+    }
+  });
+
+  return { name, date, business: biz, notes, items: lines, total: "$" + total.toFixed(2) + " CAD" };
+}
+
+async function submitOrder() {
+  const name = document.getElementById("clientName").value.trim();
+  const items = PRODUCTS.filter(p => (parseInt(document.getElementById("qty_" + p.id).value) || 0) > 0);
+
+  const errEl = document.getElementById("errorMsg");
+  if (!name || items.length === 0) {
+    errEl.style.display = "block";
+    return;
+  }
+  errEl.style.display = "none";
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+
+  const payload = buildOrderText();
+
+  try {
+    if (POWER_AUTOMATE_URL !== "YOUR_POWER_AUTOMATE_URL_HERE") {
+      await fetch(POWER_AUTOMATE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+    document.getElementById("formSection").style.display = "none";
+    document.getElementById("successScreen").style.display = "block";
+    document.getElementById("successDetail").textContent =
+      `Order from ${payload.name} (${payload.business || "Fit Curry"}) for the week of ${payload.date || "—"} has been sent. Total: ${payload.total}.`;
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "Submit order";
+    errEl.textContent = "Something went wrong. Please try again.";
+    errEl.style.display = "block";
+  }
+}
+
+function resetForm() {
+  document.getElementById("formSection").style.display = "block";
+  document.getElementById("successScreen").style.display = "none";
+  document.getElementById("clientName").value = "";
+  document.getElementById("weekDate").value = "";
+  document.getElementById("businessName").value = "";
+  document.getElementById("notes").value = "";
+  PRODUCTS.forEach(p => {
+    document.getElementById("qty_" + p.id).value = "";
+    document.getElementById("brand_" + p.id).selectedIndex = 0;
+    const wrap = document.getElementById("brandCustomWrap_" + p.id);
+    if (wrap) wrap.style.display = "none";
+    document.getElementById("lineTotal_" + p.id).textContent = "";
+  });
+  updateSummary();
+  document.getElementById("submitBtn").disabled = false;
+  document.getElementById("submitBtn").textContent = "Submit order";
+}
+
+buildProducts();
+</script>
+</body>
+</html>
