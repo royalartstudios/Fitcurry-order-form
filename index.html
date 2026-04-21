@@ -146,7 +146,7 @@
 </div>
 
 <script>
-const POWER_AUTOMATE_URL = "YOUR_POWER_AUTOMATE_URL_HERE";
+const YOUR_EMAIL = "YOUR_OUTLOOK_EMAIL_HERE";
 
 const PRODUCTS = [
   { id: "c16",   name: "16oz Container",                         pack: 200,  price: 24,   branded: false },
@@ -271,7 +271,7 @@ function buildOrderText() {
   return { name, date, business: biz, notes, items: lines, total: "$" + total.toFixed(2) + " CAD" };
 }
 
-async function submitOrder() {
+function submitOrder() {
   const name = document.getElementById("clientName").value.trim();
   const items = PRODUCTS.filter(p => (parseInt(document.getElementById("qty_" + p.id).value) || 0) > 0);
 
@@ -282,30 +282,39 @@ async function submitOrder() {
   }
   errEl.style.display = "none";
 
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true;
-  btn.textContent = "Sending...";
-
   const payload = buildOrderText();
 
-  try {
-    if (POWER_AUTOMATE_URL !== "YOUR_POWER_AUTOMATE_URL_HERE") {
-      await fetch(POWER_AUTOMATE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    }
+  let body = "NEW WEEKLY ORDER — ROYAL ART STUDIOS\n";
+  body += "==========================================\n\n";
+  body += "Client: " + payload.name + "\n";
+  body += "Business: " + (payload.business || "Fit Curry") + "\n";
+  body += "Week of: " + (payload.date || "Not specified") + "\n\n";
+  body += "ORDER ITEMS:\n";
+  body += "------------\n";
+  payload.items.forEach(item => {
+    body += item.product + "\n";
+    body += "  Cases: " + item.cases + " | Brand: " + item.brand + " | Subtotal: " + item.subtotal + "\n";
+  });
+  body += "\n==========================================\n";
+  body += "TOTAL: " + payload.total + "\n";
+  body += "==========================================\n";
+  if (payload.notes) {
+    body += "\nNOTES:\n" + payload.notes + "\n";
+  }
+
+  const subject = "New Order — " + (payload.business || "Fit Curry") + " — Week of " + (payload.date || "");
+  const mailtoLink = "mailto:" + YOUR_EMAIL +
+    "?subject=" + encodeURIComponent(subject) +
+    "&body=" + encodeURIComponent(body);
+
+  window.location.href = mailtoLink;
+
+  setTimeout(() => {
     document.getElementById("formSection").style.display = "none";
     document.getElementById("successScreen").style.display = "block";
     document.getElementById("successDetail").textContent =
-      `Order from ${payload.name} (${payload.business || "Fit Curry"}) for the week of ${payload.date || "—"} has been sent. Total: ${payload.total}.`;
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = "Submit order";
-    errEl.textContent = "Something went wrong. Please try again.";
-    errEl.style.display = "block";
-  }
+      "Order from " + payload.name + " (" + (payload.business || "Fit Curry") + ") for the week of " + (payload.date || "—") + " — Total: " + payload.total + ". Your email app has opened — just hit Send!";
+  }, 500);
 }
 
 function resetForm() {
